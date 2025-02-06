@@ -78,6 +78,9 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    double start_time, end_time, elapsed_time;
+        start_time = omp_get_wtime();
+
     if (!useParallel) { // Sequential execution
         if (!useTransposed) { // Sequential flat multiplication: C = A * B
             for (int i = 0; i < N; i++) {
@@ -127,7 +130,20 @@ int main(int argc, char *argv[]) {
         }
     }
 
-
+    end_time = omp_get_wtime();
+      elapsed_time = end_time - start_time;
+      // Print the timing result according to mode and multiplication type
+      if (!useParallel) {
+          if (!useTransposed)
+              printf("Sequential flat: %.6f\n", elapsed_time);
+          else
+              printf("Sequential transposed: %.6f\n", elapsed_time);
+      } else {
+          if (!useTransposed)
+              printf("Parallel flat: %.6f\n", elapsed_time);
+          else
+              printf("Parallel transposed: %.6f\n", elapsed_time);
+      }
     // Clean up allocated memory
     free(A);
     free(B);
