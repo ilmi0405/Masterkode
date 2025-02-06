@@ -15,18 +15,24 @@
 #include <omp.h>
 #include <math.h>   // for fabs if you want approximate comparisons
 
-/*
-   Change N for different sizes. Beware that for very large N,
-   you need sufficient memory and time.
-*/
-#define N 1000
 
 // Optional: To compare floating-point results with a small tolerance
 static int double_equals(double a, double b, double epsilon) {
     return fabs(a - b) < epsilon;
 }
 
-int main(void) {
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <N>\n", argv[0]);
+        return 1;
+    }
+
+    int N = atoi(argv[1]);
+    if (N <= 0) {
+        fprintf(stderr, "N must be a positive integer.\n");
+        return 1;
+    }
+
     // Allocate flat memory for matrices (A, B, B_T)
     double *A       = (double *) malloc(N*N * sizeof(double));
     double *B       = (double *) malloc(N*N * sizeof(double));
