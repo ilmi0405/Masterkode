@@ -13,9 +13,9 @@
 
 # Define the RAPL energy file paths (relative to the MASTERKODE folder)
 RAPL_PKG_FILE="../sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj"
-RAPL_CORE_FILE="../sys/class/powercap/intel-rapl/intel-rapl:0:0/energy_uj"
-RAPL_UNCORE_FILE="../sys/class/powercap/intel-rapl/intel-rapl:0:1/energy_uj"
-RAPL_DRAM_FILE="../sys/class/powercap/intel-rapl/intel-rapl:0:2/energy_uj"
+RAPL_CORE_FILE="../sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj"
+RAPL_UNCORE_FILE="../sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:1/energy_uj"
+RAPL_DRAM_FILE="../sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:2/energy_uj"
 
 # Path to the executable "MM" (assumed to be in the current directory)
 EXECUTABLE="$PWD/MM"
