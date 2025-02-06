@@ -24,7 +24,7 @@ EXECUTABLE="$PWD/MM"
 CSV_LOGFILE="$PWD/experiment_results.csv"
 
 # Matrix sizes to test
-Ns=(50 100 200 500 1000 1500)
+Ns=(50 100 200 500 1000 1500 2500 3500)
 
 # Multiplication types to test
 mult_types=("flat" "transposed")
