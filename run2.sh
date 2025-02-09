@@ -54,7 +54,7 @@ case "$ALGORITHM" in
         EXECUTABLE="$PWD/mergesort"
         CSV_LOGFILE="$PWD/mergesort_experiment_results.csv"
         # Array sizes to test (you can adjust these values as needed):
-        Ns=(100000 1000000 10000000 100000000)
+        Ns=(1000 1000 10000 100000 1000000 10000000 100000000 500000000)
         # For mergesort, the output is expected to be like:
         #    "Sequential: 0.123456" or "Parallel: 0.123456"
         # so the timing value is in the second column.
