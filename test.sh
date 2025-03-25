@@ -38,7 +38,7 @@ if [ "$ALGORITHM" = "matrix" ]; then
     EXECUTABLE="$PWD/MM"
     CSV_LOGFILE="$PWD/experiment_results.csv"
     # Matrix sizes to test:
-    Ns=(50 100 200 500 1000)
+    Ns=(50 100 200 500 1000 1500 2500 3500)
     # Multiplication types to test:
     mult_types=("flat" "transposed")
     # For MM, the program prints a line such as:
@@ -152,7 +152,7 @@ elif [ "$ALGORITHM" = "mergesort" ]; then
     EXECUTABLE="$PWD/mergesort"
     CSV_LOGFILE="$PWD/mergesort_experiment_results.csv"
     # Array sizes to test:
-    Ns=(1000 10000 100000 1000000)
+    Ns=(1000 1000 10000 100000 1000000 10000000 100000000 500000000)
     # For mergesort, the output is expected to be like "Sequential: 0.123456" or "Parallel: 0.123456"
     # so the timing value is in the second column.
     time_idx=2
