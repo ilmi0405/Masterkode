@@ -15,6 +15,7 @@
 # time is extracted from the program’s output. The median values over the runs are computed,
 # and the results are saved in a CSV file.
 #
+# Usage: ./run_experiments.sh <mergesort|matrix>
 
 # --- Check Arguments ---
 if [ "$#" -ne 1 ]; then
