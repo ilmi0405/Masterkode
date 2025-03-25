@@ -25,10 +25,10 @@ fi
 ALGORITHM="$1"
 
 # --- RAPL Energy File Paths (adjust as needed) ---
-RAPL_PKG_FILE="../sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj"
-RAPL_CORE_FILE="../sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj"
-RAPL_UNCORE_FILE="../sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:1/energy_uj"
-RAPL_DRAM_FILE="../sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:2/energy_uj"
+RAPL_PKG_FILE="../../../sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj"
+RAPL_CORE_FILE="../../../sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj"
+RAPL_UNCORE_FILE="../../../sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:1/energy_uj"
+RAPL_DRAM_FILE="../../../sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:2/energy_uj"
 
 # --- Number of Runs per Configuration ---
 num_runs=7
