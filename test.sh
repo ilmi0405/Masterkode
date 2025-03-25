@@ -34,34 +34,32 @@ function read_energy() {
     cat "$file"
 }
 
-# --- Set Up Experiment Parameters Based on the Chosen Algorithm ---
 if [ "$ALGORITHM" = "matrix" ]; then
     EXECUTABLE="$PWD/MM"
     CSV_LOGFILE="$PWD/experiment_results.csv"
     # Matrix sizes to test:
-    Ns=(50 100 200 500 1000   )
+    Ns=(50 100 200 500 1000)
     # Multiplication types to test:
     mult_types=("flat" "transposed")
     # For MM, the program prints a line such as:
     #    "Sequential flat: 0.123456" or "Parallel transposed: 0.123456"
     # so the timing value is in the third column.
     time_idx=3
-    # CSV header includes an extra column for multiplication type and parallel threads.
-    echo "N,multiplication_type,par_threads,seq_pkg_energy,seq_core_energy,seq_uncore_energy,seq_dram_energy,seq_time,par_pkg_energy,par_core_energy,par_uncore_energy,par_dram_energy,par_time" > "$CSV_LOGFILE"
+    # CSV header with separate mode and threads fields.
+    echo "N,multiplication_type,mode,threads,pkg_energy,core_energy,uncore_energy,dram_energy,time" > "$CSV_LOGFILE"
 
     echo "Starting experiments for matrix multiplication..."
     echo "Results will be saved in $CSV_LOGFILE"
 
     for mult in "${mult_types[@]}"; do
         for N in "${Ns[@]}"; do
-            # Arrays for sequential measurements
+            # ---- Sequential Run ----
             seq_pkg_energy_vals=()
             seq_core_energy_vals=()
             seq_uncore_energy_vals=()
             seq_dram_energy_vals=()
             seq_time_vals=()
 
-            # Run sequential configuration num_runs times.
             for (( i=1; i<=num_runs; i++ )); do
                 start_pkg=$(read_energy "$RAPL_PKG_FILE")
                 start_core=$(read_energy "$RAPL_CORE_FILE")
@@ -89,14 +87,17 @@ if [ "$ALGORITHM" = "matrix" ]; then
                 seq_time_vals+=("$time_val")
             done
 
-            # Compute medians for sequential measurements.
             seq_pkg_energy_median=$(median "${seq_pkg_energy_vals[@]}")
             seq_core_energy_median=$(median "${seq_core_energy_vals[@]}")
             seq_uncore_energy_median=$(median "${seq_uncore_energy_vals[@]}")
             seq_dram_energy_median=$(median "${seq_dram_energy_vals[@]}")
             seq_time_median=$(median "${seq_time_vals[@]}")
 
-            # Now run parallel tests for each thread count.
+            # Write a row for the sequential run (threads field left empty)
+            echo "$N,$mult,seq,,$seq_pkg_energy_median,$seq_core_energy_median,$seq_uncore_energy_median,$seq_dram_energy_median,$seq_time_median" >> "$CSV_LOGFILE"
+            echo "Completed matrix sequential: N=$N, type=$mult -> Time=$seq_time_median s"
+
+            # ---- Parallel Runs ----
             for thread in "${thread_counts[@]}"; do
                 par_pkg_energy_vals=()
                 par_core_energy_vals=()
@@ -138,9 +139,10 @@ if [ "$ALGORITHM" = "matrix" ]; then
                 par_dram_energy_median=$(median "${par_dram_energy_vals[@]}")
                 par_time_median=$(median "${par_time_vals[@]}")
 
-                echo "$N,$mult,$thread,$seq_pkg_energy_median,$seq_core_energy_median,$seq_uncore_energy_median,$seq_dram_energy_median,$seq_time_median,$par_pkg_energy_median,$par_core_energy_median,$par_uncore_energy_median,$par_dram_energy_median,$par_time_median" >> "$CSV_LOGFILE"
-
-                echo "Completed matrix: N=$N, type=$mult, threads=$thread -> Seq(time=$seq_time_median s) | Par(time=$par_time_median s)"
+                echo "$N,$mult,par,$thread,$seq_pkg_energy_median,$seq_core_energy_median,$seq_uncore_energy_median,$seq_dram_energy_median,$par_time_median" >> "$CSV_LOGFILE"
+                # Note: In this row, you can include either sequential medians for comparison
+                # or only parallel medians (as shown here, only par_time_median is appended).
+                echo "Completed matrix parallel: N=$N, type=$mult, threads=$thread -> Time=$par_time_median s"
             done
         done
     done
@@ -148,27 +150,25 @@ if [ "$ALGORITHM" = "matrix" ]; then
 elif [ "$ALGORITHM" = "mergesort" ]; then
     EXECUTABLE="$PWD/mergesort"
     CSV_LOGFILE="$PWD/mergesort_experiment_results.csv"
-    # Array sizes to test (you can adjust these values as needed):
-    Ns=(1000 1000 10000 100000    )
-    # For mergesort, the output is expected to be like:
-    #    "Sequential: 0.123456" or "Parallel: 0.123456"
+    # Array sizes to test:
+    Ns=(1000 10000 100000 1000000)
+    # For mergesort, the output is expected to be like "Sequential: 0.123456" or "Parallel: 0.123456"
     # so the timing value is in the second column.
     time_idx=2
-    # CSV header now includes the number of parallel threads.
-    echo "N,par_threads,seq_pkg_energy,seq_core_energy,seq_uncore_energy,seq_dram_energy,seq_time,par_pkg_energy,par_core_energy,par_uncore_energy,par_dram_energy,par_time" > "$CSV_LOGFILE"
+    # CSV header with separate mode and threads fields.
+    echo "N,mode,threads,pkg_energy,core_energy,uncore_energy,dram_energy,time" > "$CSV_LOGFILE"
 
     echo "Starting experiments for mergesort..."
     echo "Results will be saved in $CSV_LOGFILE"
 
     for N in "${Ns[@]}"; do
-        # Arrays for sequential measurements.
+        # ---- Sequential Run ----
         seq_pkg_energy_vals=()
         seq_core_energy_vals=()
         seq_uncore_energy_vals=()
         seq_dram_energy_vals=()
         seq_time_vals=()
 
-        # Run sequential configuration num_runs times.
         for (( i=1; i<=num_runs; i++ )); do
             start_pkg=$(read_energy "$RAPL_PKG_FILE")
             start_core=$(read_energy "$RAPL_CORE_FILE")
@@ -196,14 +196,16 @@ elif [ "$ALGORITHM" = "mergesort" ]; then
             seq_time_vals+=("$time_val")
         done
 
-        # Compute medians for sequential measurements.
         seq_pkg_energy_median=$(median "${seq_pkg_energy_vals[@]}")
         seq_core_energy_median=$(median "${seq_core_energy_vals[@]}")
         seq_uncore_energy_median=$(median "${seq_uncore_energy_vals[@]}")
         seq_dram_energy_median=$(median "${seq_dram_energy_vals[@]}")
         seq_time_median=$(median "${seq_time_vals[@]}")
 
-        # Run parallel tests for each thread count.
+        echo "$N,seq,,$seq_pkg_energy_median,$seq_core_energy_median,$seq_uncore_energy_median,$seq_dram_energy_median,$seq_time_median" >> "$CSV_LOGFILE"
+        echo "Completed mergesort sequential: N=$N -> Time=$seq_time_median s"
+
+        # ---- Parallel Runs ----
         for thread in "${thread_counts[@]}"; do
             par_pkg_energy_vals=()
             par_core_energy_vals=()
@@ -217,7 +219,6 @@ elif [ "$ALGORITHM" = "mergesort" ]; then
                 start_uncore=$(read_energy "$RAPL_UNCORE_FILE")
                 start_dram=$(read_energy "$RAPL_DRAM_FILE")
 
-                # Pass the thread count as the 3rd argument.
                 output=$("$EXECUTABLE" "$N" par "$thread")
 
                 end_pkg=$(read_energy "$RAPL_PKG_FILE")
@@ -245,11 +246,11 @@ elif [ "$ALGORITHM" = "mergesort" ]; then
             par_dram_energy_median=$(median "${par_dram_energy_vals[@]}")
             par_time_median=$(median "${par_time_vals[@]}")
 
-            echo "$N,$thread,$seq_pkg_energy_median,$seq_core_energy_median,$seq_uncore_energy_median,$seq_dram_energy_median,$seq_time_median,$par_pkg_energy_median,$par_core_energy_median,$par_uncore_energy_median,$par_dram_energy_median,$par_time_median" >> "$CSV_LOGFILE"
-
-            echo "Completed mergesort: N=$N, threads=$thread -> Seq(time=$seq_time_median s) | Par(time=$par_time_median s)"
+            echo "$N,par,$thread,$par_pkg_energy_median,$par_core_energy_median,$par_uncore_energy_median,$par_dram_energy_median,$par_time_median" >> "$CSV_LOGFILE"
+            echo "Completed mergesort parallel: N=$N, threads=$thread -> Time=$par_time_median s"
         done
     done
+
 else
     echo "Unknown algorithm '$ALGORITHM'. Use either 'mergesort' or 'matrix'."
     exit 1
