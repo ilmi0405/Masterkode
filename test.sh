@@ -98,52 +98,53 @@ if [ "$ALGORITHM" = "matrix" ]; then
             echo "Completed matrix sequential: N=$N, type=$mult -> Time=$seq_time_median s"
 
             # ---- Parallel Runs ----
-            for thread in "${thread_counts[@]}"; do
-                par_pkg_energy_vals=()
-                par_core_energy_vals=()
-                par_uncore_energy_vals=()
-                par_dram_energy_vals=()
-                par_time_vals=()
+  for thread in "${thread_counts[@]}"; do
+      par_pkg_energy_vals=()
+      par_core_energy_vals=()
+      par_uncore_energy_vals=()
+      par_dram_energy_vals=()
+      par_time_vals=()
 
-                for (( i=1; i<=num_runs; i++ )); do
-                    start_pkg=$(read_energy "$RAPL_PKG_FILE")
-                    start_core=$(read_energy "$RAPL_CORE_FILE")
-                    start_uncore=$(read_energy "$RAPL_UNCORE_FILE")
-                    start_dram=$(read_energy "$RAPL_DRAM_FILE")
+      for (( i=1; i<=num_runs; i++ )); do
+          start_pkg=$(read_energy "$RAPL_PKG_FILE")
+          start_core=$(read_energy "$RAPL_CORE_FILE")
+          start_uncore=$(read_energy "$RAPL_UNCORE_FILE")
+          start_dram=$(read_energy "$RAPL_DRAM_FILE")
 
-                    # Pass the thread count as the 4th argument.
-                    output=$("$EXECUTABLE" "$N" par "$mult" "$thread")
+          # Pass the thread count as the 4th argument.
+          output=$("$EXECUTABLE" "$N" par "$mult" "$thread")
 
-                    end_pkg=$(read_energy "$RAPL_PKG_FILE")
-                    end_core=$(read_energy "$RAPL_CORE_FILE")
-                    end_uncore=$(read_energy "$RAPL_UNCORE_FILE")
-                    end_dram=$(read_energy "$RAPL_DRAM_FILE")
+          end_pkg=$(read_energy "$RAPL_PKG_FILE")
+          end_core=$(read_energy "$RAPL_CORE_FILE")
+          end_uncore=$(read_energy "$RAPL_UNCORE_FILE")
+          end_dram=$(read_energy "$RAPL_DRAM_FILE")
 
-                    pkg_energy=$(( end_pkg - start_pkg ))
-                    core_energy=$(( end_core - start_core ))
-                    uncore_energy=$(( end_uncore - start_uncore ))
-                    dram_energy=$(( end_dram - start_dram ))
+          pkg_energy=$(( end_pkg - start_pkg ))
+          core_energy=$(( end_core - start_core ))
+          uncore_energy=$(( end_uncore - start_uncore ))
+          dram_energy=$(( end_dram - start_dram ))
 
-                    time_val=$(echo "$output" | grep -i "Parallel" | awk "{print \$$time_idx}")
+          time_val=$(echo "$output" | grep -i "Parallel" | awk "{print \$$time_idx}")
 
-                    par_pkg_energy_vals+=("$pkg_energy")
-                    par_core_energy_vals+=("$core_energy")
-                    par_uncore_energy_vals+=("$uncore_energy")
-                    par_dram_energy_vals+=("$dram_energy")
-                    par_time_vals+=("$time_val")
-                done
+          par_pkg_energy_vals+=("$pkg_energy")
+          par_core_energy_vals+=("$core_energy")
+          par_uncore_energy_vals+=("$uncore_energy")
+          par_dram_energy_vals+=("$dram_energy")
+          par_time_vals+=("$time_val")
+      done
 
-                par_pkg_energy_median=$(median "${par_pkg_energy_vals[@]}")
-                par_core_energy_median=$(median "${par_core_energy_vals[@]}")
-                par_uncore_energy_median=$(median "${par_uncore_energy_vals[@]}")
-                par_dram_energy_median=$(median "${par_dram_energy_vals[@]}")
-                par_time_median=$(median "${par_time_vals[@]}")
+      par_pkg_energy_median=$(median "${par_pkg_energy_vals[@]}")
+      par_core_energy_median=$(median "${par_core_energy_vals[@]}")
+      par_uncore_energy_median=$(median "${par_uncore_energy_vals[@]}")
+      par_dram_energy_median=$(median "${par_dram_energy_vals[@]}")
+      par_time_median=$(median "${par_time_vals[@]}")
 
-                echo "$N,$mult,par,$thread,$seq_pkg_energy_median,$seq_core_energy_median,$seq_uncore_energy_median,$seq_dram_energy_median,$par_time_median" >> "$CSV_LOGFILE"
-                # Note: In this row, you can include either sequential medians for comparison
-                # or only parallel medians (as shown here, only par_time_median is appended).
-                echo "Completed matrix parallel: N=$N, type=$mult, threads=$thread -> Time=$par_time_median s"
-            done
+      # **** Modified CSV output: now using parallel energy medians ****
+      echo "$N,$mult,par,$thread,$par_pkg_energy_median,$par_core_energy_median,$par_uncore_energy_median,$par_dram_energy_median,$par_time_median" >> "$CSV_LOGFILE"
+
+      echo "Completed matrix parallel: N=$N, type=$mult, threads=$thread -> Time=$par_time_median s"
+  done
+
         done
     done
 
